@@ -1,10 +1,12 @@
 from ultralytics import YOLO
 import cv2
+import torch
 
 # Load a model
 model = YOLO('yolov8x.pt')  # load an official model
 img = 'assets/real.jpg'
 
+# [FUNCTION] : Detect objects in an image and return a JSON object with the detected objects' information
 def detect(img, output_img = False):
     # Run inference
     results = model.predict(img)
@@ -45,6 +47,18 @@ def detect(img, output_img = False):
     # --- Output JSON ---
     print(output)
     return output
+
+
+# [DEBUG] : Check if CUDA is available
+def cuda_check():
+    if torch.cuda.is_available():
+        print("CUDA is available.")
+        print("Current device:", torch.cuda.current_device())
+        print("Device name:", torch.cuda.get_device_name(0))  # Change 0 to the GPU index you want to use if you have multiple GPUs
+        return True
+    else:
+        print("CUDA is not available. Make sure you have a compatible GPU and installed the necessary libraries.")
+        return False
 
 
 # --- [DEBUG] Save image with bounding boxes and labels ---
