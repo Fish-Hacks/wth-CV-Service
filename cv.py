@@ -4,11 +4,11 @@ import torch
 
 # Load a model
 model = YOLO('yolov8x.pt')  # load an official model
-img = 'assets/chair.jpg'
+img_path = 'assets/table.jpg'
 
 # --- [FUNCTION] Normalize coordinates to image ---
-def normalize_coords(img, coords):
-    height, width, _ = img.shape
+def normalize_coords(image, coords):
+    height, width, _ = image.shape
     coords[0] = coords[0] / width
     coords[1] = coords[1] / height
     coords[2] = coords[2] / width
@@ -16,9 +16,9 @@ def normalize_coords(img, coords):
     return coords
 
 # [FUNCTION] : Detect objects in an image and return a JSON object with the detected objects' information
-def detect(img, output_img = False):
+def detect(image, output_img=False):
     # Run inference
-    results = model.predict(img)
+    results = model.predict(image)
     result = results[0]
     output = {}
 
@@ -29,7 +29,7 @@ def detect(img, output_img = False):
         prob = round(box.conf[0].item(), 2)
         
         class_name = result.names[class_id]
-        normalize = normalize_coords(img, [x1, y1, x2, y2])
+        normalize = normalize_coords(image, [x1, y1, x2, y2])
         
         # Check if the class name is already in the output dictionary
         if class_name not in output:
@@ -53,12 +53,11 @@ def detect(img, output_img = False):
 
     # --- (DEBUG) : Output OpenCV Image ---
     if output_img: 
-        save_img(img, output)
+        save_img(image, output)
 
     # --- Output JSON ---
     print(output)
     return output
-
 
 # [DEBUG] : Check if CUDA is available
 def cuda_check():
@@ -71,11 +70,8 @@ def cuda_check():
         print("CUDA is not available. Make sure you have a compatible GPU and installed the necessary libraries.")
         return False
 
-
 # --- [DEBUG] Save image with bounding boxes and labels ---
-def save_img(img, output):
-    image = cv2.imread(img)
-    
+def save_img(image, output):
     for class_name, objects in output.items():
         for obj in objects:
             x1, y1, x2, y2 = obj["raw_coordinates"]
@@ -99,4 +95,8 @@ def save_img(img, output):
     # Save the image with bounding boxes and labels
     cv2.imwrite('assets/output.jpg', image)
 
-detect(img, True)
+# Load the image using OpenCV
+image = cv2.imread(img_path)
+
+# Call the detect function with the loaded image
+detect(image, True)
