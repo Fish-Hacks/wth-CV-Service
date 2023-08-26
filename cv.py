@@ -4,7 +4,16 @@ import torch
 
 # Load a model
 model = YOLO('yolov8x.pt')  # load an official model
-img = 'assets/real.jpg'
+img = 'assets/chair.jpg'
+
+# --- [FUNCTION] Normalize coordinates to width ---
+def normalize_coords(img, coords):
+    height, width, _ = img.shape
+    coords[0] = coords[0] / width
+    coords[1] = coords[1] / height
+    coords[2] = coords[2] / width
+    coords[3] = coords[3] / height
+    return coords
 
 # [FUNCTION] : Detect objects in an image and return a JSON object with the detected objects' information
 def detect(img, output_img = False):
@@ -20,6 +29,7 @@ def detect(img, output_img = False):
         prob = round(box.conf[0].item(), 2)
         
         class_name = result.names[class_id]
+        normalize = normalize_coords(img, [x1, y1, x2, y2])
         
         # Check if the class name is already in the output dictionary
         if class_name not in output:
@@ -28,14 +38,15 @@ def detect(img, output_img = False):
         # Append the object information to the class name key in the output dictionary
         output[class_name].append({
             "probability": prob,
+            "raw_coordinates": [x1, y1, x2, y2],
             "coordinates": {
                 "top_left": {
-                    "x": x1,
-                    "y": y1
+                    "x": normalize[0],
+                    "y": normalize[1]
                 },
                 "bottom_right": {
-                    "x": x2,
-                    "y": y2
+                    "x": normalize[2],
+                    "y": normalize[3]
                 }
             }
         })
@@ -67,7 +78,7 @@ def save_img(img, output):
     
     for class_name, objects in output.items():
         for obj in objects:
-            x1, y1, x2, y2 = obj["coordinates"]
+            x1, y1, x2, y2 = obj["raw_coordinates"]
             probability = obj["probability"]
             
             # Draw a bounding box
@@ -87,3 +98,5 @@ def save_img(img, output):
 
     # Save the image with bounding boxes and labels
     cv2.imwrite('assets/output.jpg', image)
+
+detect(img, True)
