@@ -1,12 +1,11 @@
 from ultralytics import YOLO
 import cv2
 
-
 # Load a model
-model = YOLO('yolov8n.pt')  # load an official model
-img = 'assets/sign.jpg'
+model = YOLO('yolov8x.pt')  # load an official model
+img = 'assets/real.jpg'
 
-def detect(img):
+def detect(img, output_img = False):
     # Run inference
     results = model.predict(img)
     result = results[0]
@@ -27,10 +26,29 @@ def detect(img):
         # Append the object information to the class name key in the output dictionary
         output[class_name].append({
             "probability": prob,
-            "coordinates": [x1, y1, x2, y2]
+            "coordinates": {
+                "top_left": {
+                    "x": x1,
+                    "y": y1
+                },
+                "bottom_right": {
+                    "x": x2,
+                    "y": y2
+                }
+            }
         })
 
-    # OpenCV Output
+    # --- (DEBUG) : Output OpenCV Image ---
+    if output_img: 
+        save_img(img, output)
+
+    # --- Output JSON ---
+    print(output)
+    return output
+
+
+# --- [DEBUG] Save image with bounding boxes and labels ---
+def save_img(img, output):
     image = cv2.imread(img)
     
     for class_name, objects in output.items():
@@ -55,8 +73,3 @@ def detect(img):
 
     # Save the image with bounding boxes and labels
     cv2.imwrite('assets/output.jpg', image)
-
-    print(output)
-    return output
-
-detect(img)
