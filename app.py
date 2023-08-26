@@ -22,6 +22,5 @@ def cv():
     image = Image.open(image_file)
 
     result = detect(image)
-    result['uuid'] = uuid
 
     return result
