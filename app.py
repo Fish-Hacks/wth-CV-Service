@@ -13,11 +13,15 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 @app.route('/cv', methods=['post'])
 def cv():
-    schema = FrameSchema()
-    data = schema.load(request.get_json())
+    if 'application/octet-stream' != request.headers['Content-Type']:
+        return None
 
-    image_byte_arr = b64decode(data['image'])
-    image_file = BytesIO(image_byte_arr)
+    uuid = request.args['uuid']  # get uuid from the url param.
+
+    image_file = BytesIO(request.data)  # get image from the body
     image = Image.open(image_file)
 
-    return detect(image)
+    result = detect(image)
+    result['uuid'] = uuid
+
+    return result
