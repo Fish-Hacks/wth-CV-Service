@@ -2,7 +2,7 @@ from ultralytics import YOLO
 import cv2
 import torch
 
-# Load a model
+# -- Init Model --
 model = YOLO('yolov8x.pt')  # load an official model
 img_path = 'assets/table.jpg'
 
@@ -17,47 +17,52 @@ def normalize_coords(image, coords):
 
 # [FUNCTION] : Detect objects in an image and return a JSON object with the detected objects' information
 def detect(image, output_img=False):
-    # Run inference
-    results = model.predict(image)
-    result = results[0]
-    output = {}
+    try:
+        image = cv2.imread(image) # Parse image to OpenCV format (To get shape of image)
+        results = model.predict(image)
+        result = results[0]
+        output = {}
 
-    # Draw bounding boxes and labels of detections
-    for box in result.boxes:
-        x1, y1, x2, y2 = [round(x) for x in box.xyxy[0].tolist()]
-        class_id = box.cls[0].item()
-        prob = round(box.conf[0].item(), 2)
-        
-        class_name = result.names[class_id]
-        normalize = normalize_coords(image, [x1, y1, x2, y2])
-        
-        # Check if the class name is already in the output dictionary
-        if class_name not in output:
-            output[class_name] = []
+        # Draw bounding boxes and labels of detections
+        for box in result.boxes:
+            x1, y1, x2, y2 = [round(x) for x in box.xyxy[0].tolist()]
+            class_id = box.cls[0].item()
+            prob = round(box.conf[0].item(), 2)
+            
+            class_name = result.names[class_id]
+            normalize = normalize_coords(image, [x1, y1, x2, y2])
+            
+            # Check if the class name is already in the output dictionary
+            if class_name not in output:
+                output[class_name] = []
 
-        # Append the object information to the class name key in the output dictionary
-        output[class_name].append({
-            "probability": prob,
-            "raw_coordinates": [x1, y1, x2, y2],
-            "coordinates": {
-                "top_left": {
-                    "x": normalize[0],
-                    "y": normalize[1]
-                },
-                "bottom_right": {
-                    "x": normalize[2],
-                    "y": normalize[3]
+            # Append the object information to the class name key in the output dictionary
+            output[class_name].append({
+                "probability": prob,                        # Probability of the object
+                "raw_coordinates": [x1, y1, x2, y2],        # Raw coordinates of the object
+                "coordinates": {                            # Normalized coordinates of the object
+                    "top_left": {
+                        "x": normalize[0],
+                        "y": normalize[1]
+                    },
+                    "bottom_right": {
+                        "x": normalize[2],
+                        "y": normalize[3]
+                    }
                 }
-            }
-        })
+            })
 
-    # --- (DEBUG) : Output OpenCV Image ---
-    if output_img: 
-        save_img(image, output)
+        # --- (DEBUG) : Output OpenCV Image ---
+        if output_img: 
+            save_img(image, output)
 
-    # --- Output JSON ---
-    print(output)
-    return output
+        # --- Output JSON ---
+        print(output)
+        return output
+    except Exception as e:
+        print("Uh oh! Something went wrong!")
+        print(e)
+        return None
 
 # [DEBUG] : Check if CUDA is available
 def cuda_check():
@@ -94,9 +99,3 @@ def save_img(image, output):
 
     # Save the image with bounding boxes and labels
     cv2.imwrite('assets/output.jpg', image)
-
-# Load the image using OpenCV
-image = cv2.imread(img_path)
-
-# Call the detect function with the loaded image
-detect(image, True)
