@@ -6,7 +6,7 @@ import torch
 model = YOLO('yolov8x.pt')  # load an official model
 img = 'assets/chair.jpg'
 
-# --- [FUNCTION] Normalize coordinates to width ---
+# --- [FUNCTION] Normalize coordinates to image ---
 def normalize_coords(img, coords):
     height, width, _ = img.shape
     coords[0] = coords[0] / width
