@@ -71,13 +71,13 @@ def detect(image, output_img=False):
         return None
 
 
-# [DEBUG] : Check if CUDA is available
-def cuda_check():
+# [DEBUG] : Check if CUDA is available & Move model to GPU (if available)
+def cuda_init():
+    print("\nCUDA:", torch.cuda.is_available())
     if torch.cuda.is_available():
-        print("CUDA is available.")
-        print("Current device:", torch.cuda.current_device())
-        # Change 0 to the GPU index you want to use if you have multiple GPUs
-        print("Device name:", torch.cuda.get_device_name(0))
+        print("└─ Current device:", torch.cuda.current_device())
+        print("└─ Device name:", torch.cuda.get_device_name(0))
+        model.to('cuda') # Move the model to the GPU
         return True
     else:
         print("CUDA is not available. Make sure you have a compatible GPU and installed the necessary libraries.")

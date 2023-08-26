@@ -4,11 +4,14 @@ from io import BytesIO
 from flask import Flask, request
 from PIL import Image, ImageFile
 
-from cv import detect
+from cv import detect, cuda_init
 from entities.frame import FrameSchema
 
 app = Flask(__name__)
 ImageFile.LOAD_TRUNCATED_IMAGES = True
+
+# Run Inital CUDA Check
+cuda_init()
 
 
 @app.route('/cv', methods=['post'])
