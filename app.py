@@ -24,3 +24,17 @@ def cv():
     result = detect(image)
 
     return result
+
+
+@app.route('/cv/base64', methods=['post'])
+def cv_base64():
+    schema = FrameSchema()
+    json = request.get_json()
+    data = schema.load(json)
+
+    image_byte_arr = b64decode(data['image'])
+    image_file = BytesIO(image_byte_arr)
+    image = Image.open(image_file)
+
+    result = detect(image)
+    return result
