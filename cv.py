@@ -3,15 +3,14 @@ import torch
 from ultralytics import YOLO
 
 # -- Init Model --
-model = YOLO('yolov8x.pt')  # load an official model
-img_path = 'assets/table.jpg'
+model = YOLO('yolov8n.pt')  # Offical YOLO Models (n -> s -> m -> i -> x)
+img_path = 'assets/table.jpg' # Test Image
+
+
 
 # --- [FUNCTION] Normalize coordinates to image ---
-
-
 def normalize_coords(image, coords):
     height, width = image.size
-
     return [
         coords[0] / width,
         coords[1] / height,
@@ -19,9 +18,9 @@ def normalize_coords(image, coords):
         coords[3] / height
     ]
 
+
+
 # [FUNCTION] : Detect objects in an image and return a JSON object with the detected objects' information
-
-
 def detect(image, output_img=False):
     try:
         # Parse image to OpenCV format (To get shape of image)
@@ -71,9 +70,8 @@ def detect(image, output_img=False):
         print(e)
         return None
 
+
 # [DEBUG] : Check if CUDA is available
-
-
 def cuda_check():
     if torch.cuda.is_available():
         print("CUDA is available.")
@@ -85,9 +83,9 @@ def cuda_check():
         print("CUDA is not available. Make sure you have a compatible GPU and installed the necessary libraries.")
         return False
 
+
+
 # --- [DEBUG] Save image with bounding boxes and labels ---
-
-
 def save_img(image, output):
     for class_name, objects in output.items():
         for obj in objects:
