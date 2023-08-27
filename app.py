@@ -17,7 +17,7 @@ cuda_init()
 @app.route('/cv', methods=['post'])
 def cv():
     if 'application/octet-stream' != request.headers['Content-Type']:
-        return None
+        return {'msg': 'Error: Content type is not an octet stream.'}
 
     uuid = request.args['uuid']  # get uuid from the url param.
 
