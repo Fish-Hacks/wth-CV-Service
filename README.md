@@ -1,2 +1,7 @@
 # CV-Service
-CV Thingy
+> Object Detection with YOLO and Flask
+
+#### Technologies
+- Flask
+- YoloV8 (n Model)
+- CUDA (GPU Accelrator)
